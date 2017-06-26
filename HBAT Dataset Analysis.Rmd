@@ -1,0 +1,760 @@
+---
+output:
+  word_document: default
+  pdf_document: default
+  html_document: default
+---
+Data Scientist Project 
+========================================================
+
+
+step 1:
+Define the research problem, objectives and muitivariate technique to be used:
+Dataset need to cleaned and to be used for predict continuous variable & category variable 
+step 2:
+Develop the analysis plan
+step 3:
+Evalute the assuption underlying the statistical technique
+step 4:
+Estimate the statistical technique And access the overall model fit
+step 5:
+Interpret the variates
+step 6:
+validate the statistical model
+
+
+
+HBAT Dataset its is hypothetical data from HBAT industry, 
+
+Dataset is about marketing research company which has different attributes whihc enables purchasing  manager about data warehouse to increase the sales & customer statisfaction by examining below attributes:
+
+Data warehouse classification variable:
+X1: Customer type: Non-Metric
+Length of the time a particular customer has been buying from HBAT:
+1- Less than 1 Year
+2- between 1 & 5 Year
+3- 5 Year+
+
+X2: Industry Type: Non-Metric
+Type of industry that purchase HBAT's paper product:
+0- Magazine Industry
+1- Newspaper Industry
+
+X3: Firm size: Non-Metric
+0- Small firm fewer than 5000 employees
+1- Large firm more than 5000 employees
+
+
+X4: Region: Non-Metric
+Customer location
+0- USA/ North America
+1- Outside USA/ North America
+
+X5: distribution system: Non-Metric
+How paper product are sold to customer:
+0-sold indirectly through a broker
+1-sold directly
+
+Performance perception variable:
+
+X6: Product Quality: Metric
+Perceived value of quality of HBAT's papaer product
+
+X7:Ecommerce Activity/Website: Metric
+Overall image of HBAT's website especially use friedliness
+
+x8:Technical Support: Metric
+Extend to which technical support is offered to help solve product/service issues
+
+x9:Complaint Resolution: Metric
+Extend to which any complaints are resolved in a timely and complete manners
+
+x10:Adversitement: Metric
+Perception of HBAT's advertising campaign in all type of media
+
+x11: Product line :Metric
+Depth and breath of HBAT's Product line to meet customer needs
+
+x12:Salesforce Image: Metric
+Overall image of HBAT's salesforce
+
+x13:Competitive Pricing: Metric
+Extent to which HBAT offers competitive price
+
+x14:Warranty & Claims: Metric
+Perception to which  HBAT's stand behind its product/service warrienties ans claims
+
+x15:New Products: Metric
+Extent to which HBAT develop and sell new products
+
+x16:Ordering & billing: Metric
+Perception that ordering and billing is handled effieciently ans correctly
+
+
+x17:Price Flexibility: Metric
+Perceived willingness of HBAT sales reps to negotiate price on purchases of paper prodcuts
+
+x18:Delivery Speed: Metric
+Amount of time it takes to deliver the paper products once on order has been confirmed
+
+
+Outcome / Relationship Measure:
+x19:Satisfaction: Metric
+Customer statisfcation with past purchases from HBAT measured in a 10 point graphic rating scale
+
+x20:Likehood of Recommendation: Metric
+Likelihood of recommendating HBAT to other frims as a suppier of paer product, measured on a 10 pint graphic rating scale
+
+x21:Likehood of future purchase: Metric
+Likehood of purchaseing paer products from HBAT in the furture measured on 100 point graphic rating scale 
+
+x22:Current Purchase / Usage Level: Metric
+Percentage fo the respounding firm's paper needs purchases from HBAT's measured on a 100 point percetage scale
+
+x23:Consider stratigic Alliance / Partnership in future: Non-Metric
+Extent to whicch the customer/respondent perceives his or her firm would engage in strtegic alliance/paternership with HBAT
+
+
+```{r}
+library(class)
+library(e1071)
+library(caret)
+library(klaR)
+library(caTools)
+library(PerformanceAnalytics)
+library(car)
+library(nortest)
+library(Amelia)
+library(Hmisc)
+library(mlbench)
+library(e1071)
+library(caret)
+library(DMwR)
+library(PerformanceAnalytics)
+library(VIM)
+require(MASS)
+library(rpart)
+library(VIM)
+require(MASS)
+library(ggplot2)
+library(vioplot)
+
+## Importing Dataset from SPSS file using foreign library
+MT.HBAT  <-   foreign::read.spss (file = "E:/Multivariant ANalysis/Multivariate_Data_Analysis_7e_Datasets_and_Documentation/HBAT_200.sav",
+                             to.data.frame = TRUE)
+MT.HBAT  <-   as.data.frame (MT.HBAT)
+
+attributes(MT.HBAT)$variable.labels
+
+names(MT.HBAT) <- c ("ID",
+                  "X1.Customer_Type",
+                  "X2.Industry_Type",
+                  "X3.Firm_Size",
+                  "X4.Region",
+                  "X5.Distribution_System",
+                  "X6.Product_Quality",
+                  "X7.E.Commerce",
+                  "X8.Technical_Support",
+                  "X9.Complaint_Resolution",
+                  "X10.Advertising",
+                  "X11.Product_Line",
+                  "X12.Salesforce_Image",
+                  "X13.Competitive_Pricing",
+                  "X14.Warranty_Claims",
+                  "X15.New_Products",
+                  "X16.Order_Billing",
+                  "X17.Price_Flexibility",
+                  "X18.Delivery_Speed",
+                  "X19.Satisfaction",
+                  "X20.Likely_to_Recommend",
+                  "X21.Likely_to_Purchase",
+                  "X22.Purchase_Level",
+                  "X23.Consider_Strategic_Alliance")
+
+attr (MT.HBAT, which="variable.labels", exact=TRUE)
+
+str (MT.HBAT)
+names (MT.HBAT)
+dim (MT.HBAT)
+sum (is.na(MT.HBAT))
+MT.HBAT<-na.omit (MT.HBAT)
+```
+
+```{r}
+##??missmap
+windows.options (reset=TRUE)
+windows.options(width=8, height=8)
+
+## Graphical representation for MIssing value in HBAT Data set
+missmap (MT.HBAT[,-1])
+
+## MIssing value of HBAT Data set with some color attributes
+missmap (MT.HBAT[,-1],
+         main="Missing Data Analysis graph",
+         ##xlab=names(MT.HBAT[,-1]),
+         cex.axis=10.5,
+         ##ylab="Proportion of MissingData",
+         legend = TRUE,
+         col = c("blue", "yellow"),
+         legend.pos="topleft",
+         y.cex = 0.5, x.cex = 0.5, hang=1,xaxt = "n")
+
+#OR
+aggr (MT.HBAT[,-1],axes = TRUE)
+
+
+```
+
+```{r}
+##Graphs & Plots 
+MT.HBAT2  <-  MT.HBAT[,-1]
+
+boxplot(MT.HBAT2[,6:18],varwidth=T,col=rainbow(length(MT.HBAT2)))
+## Extracting the Continuos variable under descriptive study from the data set 
+varlist  <-  names(MT.HBAT2[,6:22])
+attach(MT.HBAT2)
+for (i in 1:length(varlist))
+{
+    hist(get(varlist[i]),xlab=varlist[i] )
+}
+
+for (i in 1:length(varlist))
+{
+    vioplot(get(varlist[i]),names=varlist[i])
+}
+
+
+```
+
+```{r}
+# DISTANCE BASED APPROACH FOR OUTLIER DETECTION
+library(DMwR)
+MT.HBAT2  <-  MT.HBAT[,-1]
+outlier.scores   <-  lofactor(MT.HBAT2[,6:22],k = 5)
+outliers   <-   order(outlier.scores, decreasing=T)[1:5]
+outliers
+print(outliers)
+
+n   <-   nrow(MT.HBAT2)
+
+labels   <-   1:n
+labels[-outliers]   <-   "."
+biplot(prcomp(MT.HBAT2[,6:22]), cex=1, xlabs=labels)
+
+## Remove Outliers from the dataset
+MT.HBAT2  <-   MT.HBAT2[-outliers,]
+
+dim(MT.HBAT2)
+pch   <-   rep(".", n)
+pch[outliers]   <-   "+"
+col   <-   rep("black", n)
+col[outliers]   <-   "red"
+pairs(MT.HBAT2[,6:22], pch=pch, col=col)
+boxplot(MT.HBAT2[,6:18],col=rainbow(6:18))
+
+# DISTANCE BASED APPROACH FOR OUTLIER DETECTION
+
+model1  <-   lm(X19.Satisfaction
+~X6.Product_Quality+X7.E.Commerce+X8.Technical_Support+X9.Complaint_Resolution+X10.Advertising+X11.Product_Line+X12.Salesforce_Image+X13.Competitive_Pricing+X14.Warranty_Claims+X15.New_Products+X16.Order_Billing+X17.Price_Flexibility+X18.Delivery_Speed,MT.HBAT2)
+cook.sd.model1  <-   cooks.distance(model1)
+plot(cook.sd.model1, pch="*", cex=2, main="Influential Obs by Cooks distance")  # plot 
+
+##Threshold Need to defined
+abline(h = 4*mean(cook.sd.model1, na.rm=T), col="red")  # add cutoff line
+text(x=1:length(cook.sd.model1)+1, y=cook.sd.model1, labels=ifelse(cook.sd.model1>4*mean(cook.sd.model1, na.rm=T),names(cook.sd.model1),""), col="red")  # add labels
+
+4*mean(cook.sd.model1, na.rm=T)
+
+influential   <-   as.numeric(names(cook.sd.model1)[(cook.sd.model1 > 4*mean(cook.sd.model1, na.rm=T))])  # influential row numbers
+head(MT.HBAT2[influential, ])  # influential observations.
+
+MT.HBAT2  <-  MT.HBAT2[-influential, ]
+
+```
+
+
+
+```{r fig.width=7, fig.height=6}
+##Plot correlation coefficiant plots along with Rsquare, for example:
+
+
+chart.Correlation(MT.HBAT2[,6:19])
+pairs(MT.HBAT2[,6:19])
+attach(MT.HBAT2)
+
+
+
+varlist  <-  names(MT.HBAT2[,6:19])
+
+par(mfrow=c(3,5))
+for (i in 1:13)
+{
+print(varlist[i])
+print(nortest::ad.test(get(varlist[i])))
+qqnorm(get(varlist[i]),xlab=varlist[i])
+qqline(get(varlist[i]),xlab=varlist[i])
+print(skewness(get(varlist[i])))
+print(kurtosis(get(varlist[i])))
+}
+length(varlist)
+
+```
+
+Consider only continuos variable 
+```{r}
+##Stage1: HBAT wants to accurately predicting the stisfaction level of its customer. Multiple Regression Analysis was conducted in order to predict customer stisfaction based on HBAT's perception of HBAT's performance also need to identify the factors that leads to satisfcation for use in differentiated marketing campaign.
+
+
+## Training & testing dataset preparation
+str(MT.HBAT2)
+set.seed(1234)
+
+ind  <-  sample(2,nrow(MT.HBAT2),replace = TRUE, prob = c(.7,.3))
+train  <-  MT.HBAT2[ind==1,]
+test  <-  MT.HBAT2[ind==2,]
+str(train)
+str(test)
+
+##Correlation Matrix of all Indepedent variables
+cor(train[,6:19],method = "pearson")
+cor(train[,6:19],method = "spearman")
+
+## Multiple regression Analysis
+names(train)
+customer_statisfaction_lm1  <-   lm(X19.Satisfaction~X6.Product_Quality+X7.E.Commerce+X8.Technical_Support+X9.Complaint_Resolution+X10.Advertising+X11.Product_Line+X12.Salesforce_Image+X13.Competitive_Pricing+X14.Warranty_Claims+X15.New_Products+X16.Order_Billing+X17.Price_Flexibility+X18.Delivery_Speed,data = train)
+summary(customer_statisfaction_lm1)
+plot(customer_statisfaction_lm1)
+vif(customer_statisfaction_lm1)
+
+## Add categorical variable X3
+
+customer_statisfaction_lm2  <-  lm(X19.Satisfaction~X6.Product_Quality+X7.E.Commerce+X8.Technical_Support+X9.Complaint_Resolution+X10.Advertising+X11.Product_Line+X12.Salesforce_Image+X13.Competitive_Pricing+X14.Warranty_Claims+X15.New_Products+X16.Order_Billing+X17.Price_Flexibility+X18.Delivery_Speed+factor(X3.Firm_Size),data = train)
+summary(customer_statisfaction_lm2)
+plot(customer_statisfaction_lm2)
+vif(customer_statisfaction_lm2)
+
+
+
+```
+
+
+```{r}
+##Best subset analysis for MT.HBAT
+
+library(leaps)
+## We might want to know which independent variables will be best explain dependent variable 
+lea  <-   regsubsets(X19.Satisfaction~X6.Product_Quality+X7.E.Commerce+X8.Technical_Support+X9.Complaint_Resolution+X10.Advertising+X11.Product_Line+X12.Salesforce_Image+X13.Competitive_Pricing+X14.Warranty_Claims+X15.New_Products+X16.Order_Billing+X17.Price_Flexibility+X18.Delivery_Speed+factor(X3.Firm_Size),data=train,nbest=10)
+
+summary(lea)
+plot(lea,scale="adjr2",title="Best Subset variable vs Adjusted R-Square plot ",y.cex=.1)
+
+biplot(prcomp(train[,6:18]), cex=1)
+## from the plot we will say x6,x7,x9,x11,x12,x13,x17 will be able to explain variation in regression with high Adjuested R-square
+Model1  <-   lm(X19.Satisfaction~X6.Product_Quality+X7.E.Commerce+X11.Product_Line+X12.Salesforce_Image+X13.Competitive_Pricing+X17.Price_Flexibility+factor(X3.Firm_Size),data=train)
+summary(Model1)
+
+## Variation inflation factor due to Multicolliearity or heterosdasticity
+vif(mod=Model1)
+
+```
+
+
+```{r}
+##Finalized Model after above analysis
+
+str(MT.HBAT2)
+set.seed(1234)
+
+ind  <-  sample(2,nrow(MT.HBAT2),replace = TRUE, prob = c(.7,.3))
+train  <-  MT.HBAT2[ind==1,]
+test  <-  MT.HBAT2[ind==2,]
+str(train)
+str(test)
+
+Model1  <-   lm(X19.Satisfaction~X6.Product_Quality+X9.Complaint_Resolution+X12.Salesforce_Image+X7.E.Commerce+X11.Product_Line,data=train)
+summary(Model1)
+vif(Model1)## Only one varible has been introducted
+plot(Model1)
+
+plot(predict(Model1,test)-test$X19.Satisfaction)
+
+```
+
+
+```{r}
+##Backwards Regression Model
+
+regback  <-  regsubsets(X19.Satisfaction~X6.Product_Quality+X7.E.Commerce+X8.Technical_Support+X9.Complaint_Resolution+X10.Advertising+X11.Product_Line+X12.Salesforce_Image+X13.Competitive_Pricing+X14.Warranty_Claims+X15.New_Products+X16.Order_Billing+X17.Price_Flexibility+X18.Delivery_Speed+factor(X3.Firm_Size),train,method="backward",nvmax = 6)
+
+summary(regback)
+
+Model_back  <-  lm(X19.Satisfaction~X6.Product_Quality+X7.E.Commerce+X11.Product_Line+X12.Salesforce_Image+X17.Price_Flexibility+factor(X3.Firm_Size),train)
+summary(Model_back)
+plot(Model_back)
+
+```
+
+```{r}
+##Forward Regression Model
+
+regfor  <-  regsubsets(X19.Satisfaction~X6.Product_Quality+X7.E.Commerce+X8.Technical_Support+X9.Complaint_Resolution+X10.Advertising+X11.Product_Line+X12.Salesforce_Image+X13.Competitive_Pricing+X14.Warranty_Claims+X15.New_Products+X16.Order_Billing+X17.Price_Flexibility+X18.Delivery_Speed+factor(X3.Firm_Size),train,method="forward",nvmax=6)
+
+summary(regfor)
+
+Model_for  <-  lm(X19.Satisfaction~X6.Product_Quality+X7.E.Commerce+X11.Product_Line+X12.Salesforce_Image+X17.Price_Flexibility+factor(X3.Firm_Size),train)
+summary(Model_for)
+
+plot(Model_for)
+outlierTest(Model_for, cutoff=0.05, n.max=10, order=TRUE)
+```
+
+```{r}
+##Final regression model with Categorical variable
+dim(MT.HBAT2)
+x3.f  <-   factor(MT.HBAT2$X3.Firm_Size)
+summary(x3.f)
+Model1  <-   lm(X19.Satisfaction~X6.Product_Quality+X7.E.Commerce+X11.Product_Line+X12.Salesforce_Image+X17.Price_Flexibility+factor(X3.Firm_Size),data=MT.HBAT2)
+summary(Model1)
+plot(Model1)
+
+vif(Model1)
+
+##Calculate prediction accuracy and error rates
+distPred  <-  predict(Model1,newdata=test)
+
+actuals_preds   <-   data.frame(cbind(actuals=test$X19.Satisfaction, predicteds=distPred))
+
+correlation_accuracy   <-   cor(actuals_preds)  # 
+head(actuals_preds)
+
+##Now lets calculate the Min Max accuracy and MAPE:
+min_max_accuracy   <-   mean(apply(actuals_preds, 1, min) / apply(actuals_preds, 1, max))
+
+mape   <-   mean(abs((actuals_preds$predicteds - actuals_preds$actuals))/actuals_preds$actuals)
+
+min_max_accuracy
+mape
+
+```
+
+classification
+```{r}
+## Naive Byes Tree
+set.seed(1234)
+require(xlsx)
+MT.HBAT2<- read.xlsx("F:\\Data Scientist\\Project\\Multivariate_Data_Analysis_7e_Datasets_EXCEL.xls", sheetName = "HBAT_200")
+
+str(MT.HBAT2)
+
+names(MT.HBAT2) <- c ("ID",
+                  "X1.Customer_Type",
+                  "X2.Industry_Type",
+                  "X3.Firm_Size",
+                  "X4.Region",
+                  "X5.Distribution_System",
+                  "X6.Product_Quality",
+                  "X7.E.Commerce",
+                  "X8.Technical_Support",
+                  "X9.Complaint_Resolution",
+                  "X10.Advertising",
+                  "X11.Product_Line",
+                  "X12.Salesforce_Image",
+                  "X13.Competitive_Pricing",
+                  "X14.Warranty_Claims",
+                  "X15.New_Products",
+                  "X16.Order_Billing",
+                  "X17.Price_Flexibility",
+                  "X18.Delivery_Speed",
+                  "X19.Satisfaction",
+                  "X20.Likely_to_Recommend",
+                  "X21.Likely_to_Purchase",
+                  "X22.Purchase_Level",
+                  "X23.Consider_Strategic_Alliance")
+
+str(MT.HBAT2)
+
+# Sampling for traing & testing dataset
+split  <-  sample.split(MT.HBAT2$X23.Consider_Strategic_Alliance,SplitRatio = .80)
+train  <-  subset(MT.HBAT2,split ==T)
+test  <-  subset(MT.HBAT2,split ==F)
+
+## Naive Byes model in order to predict whether or not customer want to make strategic alliance  with company or not
+x23.naive.classifier  <-  naiveBayes(train[,6:18],as.factor(train$X23.Consider_Strategic_Alliance))
+x23.naive.classifier
+
+predictTest  <-  predict(x23.naive.classifier,test[,6:18])
+test$X23.Consider_Strategic_Alliance
+table(predictTest,test$X23.Consider_Strategic_Alliance)
+
+confusionMatrix(data=factor(predictTest),
+                reference=factor(test$X23.Consider_Strategic_Alliance))
+
+Accuracy<- 0.775
+Sensitivity<-0.7826          
+Specificity<- 0.7647
+a<- c(Accuracy, Sensitivity, Specificity)
+
+#compute the harmonic mean
+F1_Score<-1/mean(1/a) 
+F1_Score
+
+
+library(ROCR)
+predictTest  <-  predict(x23.naive.classifier,test[,6:18])
+
+ROCRpred  <-  prediction(test$X23.Consider_Strategic_Alliance,predictTest)
+str(ROCRpred)
+as.numeric(performance(ROCRpred,"auc")@y.values)
+perf  <-   performance(ROCRpred,measure="tpr",x.measure="fpr")
+plot(perf,col="red")
+abline(0,1)
+auc  <-  performance(ROCRpred,measure="auc")
+auc  <-   auc@y.values[[1]]
+auc
+```
+
+```{r}
+##Logistic Regression to predict company preference that they would like consider for Strategic Alliance with company
+MT.HBAT2$X23.Consider_Strategic_Alliance  <-  as.factor(MT.HBAT2$X23.Consider_Strategic_Alliance)
+
+library(caTools)
+set.seed(1000)
+split  <-  sample.split(MT.HBAT2$X23.Consider_Strategic_Alliance,SplitRatio = .70)
+train  <-  subset(MT.HBAT2,split ==T)
+test  <-  subset(MT.HBAT2,split ==F)
+str(train)
+MT.HBAT2$X23.Consider_Strategic_Alliance
+str(MT.HBAT2$X23.Consider_Strategic_Alliance)
+levels(MT.HBAT2$X23.Consider_Strategic_Alliance)
+
+x23.glm  <-   glm(factor(X23.Consider_Strategic_Alliance)~X6.Product_Quality+X7.E.Commerce+X8.Technical_Support+X9.Complaint_Resolution+X10.Advertising+X11.Product_Line+X12.Salesforce_Image+X13.Competitive_Pricing+X14.Warranty_Claims+X15.New_Products+X16.Order_Billing+X17.Price_Flexibility+X18.Delivery_Speed,data=train,family=binomial,control=list(maxit=100))
+summary(x23.glm)
+
+predictTest  <-  predict(x23.glm,type = "response",newdata = test)
+
+table(test$X23.Consider_Strategic_Alliance,predictTest>.5)
+
+
+library(ROCR)
+ROCRpred<-prediction(predictTest,test$X23.Consider_Strategic_Alliance)
+str(ROCRpred)
+as.numeric(performance(ROCRpred,"auc")@y.values)
+perf<- performance(ROCRpred,measure="tpr",x.measure="fpr")
+plot(perf,col="red")
+abline(0,1)
+auc<-performance(ROCRpred,measure="auc")
+auc<- auc@y.values[[1]]
+
+
+```
+
+
+```{r}
+## Decision Tree
+library(party)
+library(randomForest)
+attach(MT.HBAT2)
+str(MT.HBAT2)
+names(MT.HBAT2)
+## X23 Classification using Decision Tree 
+
+x23.decision.formula  <-   factor(X23.Consider_Strategic_Alliance)~X6.Product_Quality + X7.E.Commerce + 
+    X8.Technical_Support + X9.Complaint_Resolution + X10.Advertising + 
+    X11.Product_Line + X12.Salesforce_Image + X13.Competitive_Pricing + 
+    X14.Warranty_Claims + X15.New_Products + X16.Order_Billing + 
+    X17.Price_Flexibility + X18.Delivery_Speed
+summary(x23.decision.formula)
+
+x23.decision.formula.ctree  <-   ctree(x23.decision.formula,train)
+str(x23.decision.formula.ctree)
+x23.decision.formula.ctree
+table(predict(x23.decision.formula.ctree,test),test$X23.Consider_Strategic_Alliance)
+confusionMatrix(predict(x23.decision.formula.ctree,test),test$X23.Consider_Strategic_Alliance)
+plot(x23.decision.formula.ctree,cex=.25)
+
+library(tree)
+
+t  <-   tree(x23.decision.formula)
+plot(t)
+t  <-  tree(x23.decision.formula,train)
+plot(t)
+text(t)
+
+```
+
+```{r}
+
+## Randon Forest
+library(randomForest)
+set.seed(99)
+## Split index to split
+split_index  <-  ceiling(0.85*nrow(MT.HBAT2))
+
+## Do suffling
+MT.HBAT2  <-   MT.HBAT2[sample(1:nrow(MT.HBAT2)),]
+
+## Training & testing Dataset preparation 
+train  <-   MT.HBAT2[1:split_index,]
+test  <-  setdiff(MT.HBAT2,train)
+
+str(train)
+str(test)
+
+## X23 classification modeling using Random Forest
+
+X23.rt  <-  randomForest(factor(X23.Consider_Strategic_Alliance) ~ X6.Product_Quality+X7.E.Commerce+X8.Technical_Support+X9.Complaint_Resolution+X10.Advertising+X11.Product_Line+X12.Salesforce_Image+X13.Competitive_Pricing+X14.Warranty_Claims+X15.New_Products+X16.Order_Billing+X17.Price_Flexibility+X18.Delivery_Speed,data=train,ntree=5000,importance=TRUE)
+X23.rt
+plot(X23.rt)
+legend("top",colnames(X23.rt$err.rate),col=1:3,cex=.8,fill=1:3)
+
+varImpPlot(X23.rt)
+
+predictions  <-   predict(X23.rt,newdata = test)
+
+cbind(test$X23.Consider_Strategic_Alliance,as.numeric(predictions))
+
+table(test$X23.Consider_Strategic_Alliance,as.numeric(predictions))
+
+confusionMatrix(test$X23.Consider_Strategic_Alliance,factor(predictions))
+```
+
+```{r}
+##Knn Classification
+library(DMwR)
+
+str(train)
+??DMwR::kNN
+## A 3 Nearest neighbour model with no normalization
+x23.nn3  <-   DMwR::kNN(X23.Consider_Strategic_Alliance ~ X7.E.Commerce + X12.Salesforce_Image + X13.Competitive_Pricing +X17.Price_Flexibility,train = train,test = test,norm=TRUE,k=3)
+x23.nn5  <-   DMwR::kNN(X23.Consider_Strategic_Alliance~X7.E.Commerce,train = train,test = test,norm=FALSE,k=5)
+
+sum(is.na(train))
+sum(is.na(test))
+x23.nn5
+
+table(x23.nn5,test$X23.Consider_Strategic_Alliance)
+
+```
+
+```{r}
+## SVM Classification
+library(e1071)
+
+set.seed(99)
+## Split index to split
+split_index  <-  ceiling(0.85*nrow(MT.HBAT2))
+
+## Do suffling
+MT.HBAT2  <-   MT.HBAT2[sample(1:nrow(MT.HBAT2)),]
+
+## 
+train  <-   MT.HBAT2[1:split_index,]
+test  <-  setdiff(MT.HBAT2,train)
+
+##X23 Region SVM model
+X23.svm.model  <-  svm(factor(X23.Consider_Strategic_Alliance) ~ X6.Product_Quality+X7.E.Commerce+X8.Technical_Support+X9.Complaint_Resolution+X10.Advertising+X11.Product_Line+X12.Salesforce_Image+X13.Competitive_Pricing+X14.Warranty_Claims+X15.New_Products+X16.Order_Billing+X17.Price_Flexibility+X18.Delivery_Speed,data=train)
+X23.svm.model
+
+predict(X23.svm.model,test)
+
+confusionMatrix(test$X23.Consider_Strategic_Alliance,predict(X23.svm.model,test))
+
+## Find out the best Cost & Gamma function & Select Kernel for Calssification boundary
+
+svm_tune<- tune(svm,
+                train.x = train[,6:18],
+                train.y = train$X23.Consider_Strategic_Alliance,
+                kernel = "radial",
+                ranges = list(cost=10^(-1:2),gamma=c(.5,1,2)))
+svm_tune
+
+X23.svm.model.finetune <- e1071::svm (factor(X23.Consider_Strategic_Alliance) ~ X6.Product_Quality + X7.E.Commerce + X8.Technical_Support + X9.Complaint_Resolution + X10.Advertising + X11.Product_Line + X12.Salesforce_Image + X13.Competitive_Pricing + X14.Warranty_Claims + X15.New_Products + X16.Order_Billing + X17.Price_Flexibility + X18.Delivery_Speed,
+                              data = train, cost = 10,gamma=.5)
+X23.svm.model.finetune
+
+confusionMatrix(predict(X23.svm.model.finetune,test),test$X23.Consider_Strategic_Alliance)
+
+plot (X23.svm.model.finetune, 
+      data = train,
+      X17.Price_Flexibility ~ X12.Salesforce_Image)
+
+
+X23.svm.model.finetune_bestmodel <- e1071::svm (factor(X23.Consider_Strategic_Alliance)~X6.Product_Quality+X12.Salesforce_Image+X18.Delivery_Speed,
+                              data = train, cost = 10,gamma=.5)
+X23.svm.model.finetune_bestmodel
+
+confusionMatrix(predict(X23.svm.model.finetune_bestmodel,test),test$X23.Consider_Strategic_Alliance)
+
+plot (X23.svm.model.finetune_bestmodel, 
+      data = train,
+      X6.Product_Quality ~ X12.Salesforce_Image)
+
+```
+
+```{r}
+##K-Means Clustering
+wss  <-   (nrow(MT.HBAT2[,6:8])-1)* sum(apply(MT.HBAT2[,6:8],2,var))
+
+for (i in 2:15) wss[i]  <-   sum(kmeans(MT.HBAT2[,6:8],center=i)$withinss)
+
+plot(1:15,wss, type="b", xlab=" Number of Clusters",ylab="Within groups sum of square", main="Assessing the optimal number of clusters with the elbow methode",pch=10, cex=2)
+
+
+km.out = kmeans(train[,6:8], 8, nstart = 15)
+km.out
+summary(km.out)
+
+plot(train[,7:10], col = km.out$cluster, cex = 2, pch = 1, lwd = 2)
+points(train[,7:10], col = which, pch = 19)
+
+
+
+plot(MT.HBAT2[,6:8],km.out$centers,col=km.out$cluster,main="K-means wresult with 6 clusters",pch=10,cex=2)
+points(km.out$centers)
+
+
+## Considering all variables at a time
+wss  <-   (nrow(MT.HBAT2[,6:18])-1)* sum(apply(MT.HBAT2[,6:18],2,var))
+
+for (i in 2:12) wss[i]  <-   sum(kmeans(MT.HBAT2[,6:18],center=i)$withinss)
+
+plot(1:12,wss, type="b", xlab=" Number of Clusters",ylab="Within groups sum of square", main="Assessing the optimal number of clusters with the elbow methode",
+     pch=10, cex=2)
+
+
+km.out = kmeans(train[,6:18], 4, nstart = 15)
+km.out
+summary(km.out)
+
+library(cluster)
+library(fpc)
+
+?plot
+for (i in 6:17){
+##plot(train[,i], col = km.out$cluster,type="b", cex = 2, pch = 1, lwd = 2)
+##  legend((2000,9.5,c(km.out$cluster))
+##plotcluster(train[,i:(i+1)], km.out$cluster)
+
+  # More complex
+clusplot(train[,i:(i+1)], km.out$cluster, color=TRUE, shade=TRUE, labels=1, lines=0)
+    } 
+points(train[,6:18], col = which, pch = 19)
+
+plot(MT.HBAT2[,6:8],km.out$centers,col=km.out$cluster,main="K-means wresult with 4 clusters",pch=10,cex=2)
+points(km.out$centers)
+
+
+```
+
+```{r}
+
+## Heirachical Clustering
+
+hc  <-   hclust(dist(MT.HBAT2[,6:18]))
+plot(hc, hang=-1)
+
+rect.hclust(hc,k=4)
+group  <-  cutree(hc,k=4)
+
+cbind(km.out$cluster,group)
+```
