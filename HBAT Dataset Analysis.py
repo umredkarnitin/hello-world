@@ -19,21 +19,6 @@ import os
 os.getcwd()
 os.chdir('F:\Data Scientist\Project')
 
-
-# Importing HBAT SPSS Dataset
-# from rpy2.robjects import pandas2ri, r
-# filename = 'HBAT_200.sav'
-# w = r('foreign::read.spss("%s", to.data.frame=TRUE)' % filename)
-# hbat = pandas2ri.ri2py(w)
-# print(hbat.head())
-# print(hbat.columns)
-
-# import pandas.rpy.common as com
-# filename = "HBAT_200.sav"
-# w = com.robj.r('foreign::read.spss("%s", to.data.frame=TRUE)' % filename)
-# hbat = com.convert_robj(w)
-# hbat.head()
-
 # Importing HBAT csv. Dataset
 hbat= pd.read_csv('MT_HBAT.csv')
 print(hbat.head(5))
@@ -101,24 +86,6 @@ for i in list(hbat2.loc[:, hbat2.dtypes == object].columns.values) :
 ut.myCategoryToDummyFunc(hbat2)
 
 
-# You can also choose the plot kind by using the DataFrame.plot.kind methods instead of providing the kind keyword argument.
-# kind :
-# 'line' : line plot (default)
-# 'bar' : vertical bar plot
-# 'barh' : horizontal bar plot
-# 'hist' : histogram
-# 'box' : boxplot
-# 'kde' : Kernel Density Estimation plot
-# 'density' : same as 'kde'
-# 'area' : area plot
-# 'pie' : pie plot
-# 'scatter' : scatter plot
-# 'hexbin' : hexbin plot
-
-# # create a scatter plot of columns 'A' and 'C', with changing color (c) and size (s) based on column 'B'
-
-
-
 # Categorical variable Analysis
 # It is important to check the frequency distribution of categorical variable. It helps to answer the question whether data is skewed.
 # Frequency Distribution
@@ -138,8 +105,8 @@ ut.myVioplotPlot(hbat2, Dependent_Continous_Variable)
  
  
 # # Scatter Plot
-# ut.myContinousJointPlot(hbat2)
-# ut.myContinousScatterPlot(hbat2)
+ut.myContinousJointPlot(hbat2)
+ut.myContinousScatterPlot(hbat2)
 
 #Scatter Joint Plot
 # create a scatter plot of columns 'A' and 'C', with changing color (c) and size (s) based on column 'B'
@@ -153,77 +120,24 @@ ut.myPairWiseScatterPlot(hbat2)
 ut.myScatterMatrixPlot(hbat2)
 
 # Correlation Matrix
-
 ut.myCorrelationPlot(hbat2, Dependent_Continous_Variable )
 
-
-
-# import matplotlib.pyplot as plt
-# import numpy as np
-# from sklearn.model_selection import train_test_split
-# from sklearn import datasets
-# from sklearn.linear_model import LinearRegression
-# from sklearn.metrics import mean_squared_error, r2_score
-# from sklearn.dummy import DummyRegressor
-# from numpy import random, column_stack
-# from statsmodels.api import add_constant, OLS
-# 
-# X = hbat2.iloc[:,[6,7,8,9,10,11,12,13,14,15,16,17,18]]
-# y = hbat2.iloc[:,19]
-# 
-# print(X.head(5))
-# print(y.head(5))
-# 
-# X_train, X_test, y_train, y_test = train_test_split(X, y, random_state=0)
-
-# lm = LinearRegression().fit(X_train, y_train)
-# lm_dummy_mean = DummyRegressor(strategy = 'mean').fit(X_train, y_train)
-# 
-# y_predict = lm.predict(X_test)
-# y_predict_dummy_mean = lm_dummy_mean.predict(X_test)
-# 
-# print('Linear model, coefficients: ', lm.coef_)
-# print("Mean squared error (dummy): {:.2f}".format(mean_squared_error(y_test, 
-#                                                                      y_predict_dummy_mean)))
-# print("Mean squared error (linear model): {:.2f}".format(mean_squared_error(y_test, y_predict)))
-# print("r2_score (dummy): {:.2f}".format(r2_score(y_test, y_predict_dummy_mean)))
-# print("r2_score (linear model): {:.2f}".format(r2_score(y_test, y_predict)))
-# 
-# print(lm.summary())
-# # Plot outputs
-# plt.scatter(X_test['X6_Product_Quality'], y_test,  color='black')
-# plt.plot(X_test['X6_Product_Quality'], y_predict, color='green', linewidth=2)
-# plt.plot(X_test['X6_Product_Quality'], y_predict_dummy_mean, color='red', linestyle = 'dashed', 
-#          linewidth=2, label = 'dummy')
-# 
-# plt.show()
-
-# # Outliers 
-# Dependent_Continous_Variable = ['X19_Satisfaction','X20_Likely_to_Recommend','X21_Likely_to_Purchase','X22_Purchase_Level']
-# ut.is_outlier(hbat2, Dependent_Continous_Variable)
 
 
 Dependent_Variable = ['X19_Satisfaction','X20_Likely_to_Recommend','X21_Likely_to_Purchase','X22_Purchase_Level','X23_Consider_Strategic_Alliance']
 Dependent_Continous_Variable = ['X19_Satisfaction','X20_Likely_to_Recommend','X21_Likely_to_Purchase','X22_Purchase_Level']
 Dependent_Categorical_Variable = ['X23_Consider_Strategic_Alliance']
 
-# https://alstatr.blogspot.in/2015/08/r-python-and-sas-getting-started-with.html
 # Linear Regression Modeling
 
 ut.myLinearRegressionFunction(hbat2,Dependent_Continous_Variable)
-
 ut.myLinearRegressionWithCategoryFunction(hbat2, Dependent_Variable, Dependent_Continous_Variable)
-
-
-# # Best Subsetting
-# ut.myLinearRegressionBestSubsetFunction(hbat2, Dependent_Continous_Variable)
 
 
 # #Ridge Regression
 ut.myLinearRidgesWithCategoryFunction(hbat2, Dependent_Variable, Dependent_Continous_Variable)
 
 ## Logistic Regression
-  
 ut.myLogisticRegressionFunction(hbat2, Dependent_Variable, Dependent_Categorical_Variable)
 
 
@@ -247,98 +161,3 @@ ut.myRandomForestClassificationFunction(hbat2, Dependent_Variable, Dependent_Cat
 
 # SVM Classification
 ut.mySVMClassificationFunction(hbat2, Dependent_Variable, Dependent_Categorical_Variable)
-
-
-# # Data Mining : PreProcessing Steps
-# # 
-# # 1.  The machine learning package sklearn requires all categorical variables in numeric form. Hence, we need to 
-# # convert all character/categorical variables to be numeric. This can be accomplished using the following script. 
-# # In sklearn,  there is already a function for this step.
-# from sklearn.preprocessing import LabelEncoder
-# def ConverttoNumeric(hbat2):
-#     cols = list(hbat2.select_dtypes(include=['category','object']))
-#     le = LabelEncoder()
-#     for i in cols:
-#         try:
-#             hbat2[i] = le.fit_transform(hbat2[i])
-#         except:
-#             print('Error in Variable :'+i)
-#     return hbat2
-# 
-# ConverttoNumeric(hbat2)
-
-# # 2. Create Dummy Variables
-# # 
-# # Suppose you want to convert categorical variables into dummy variables. It is different to the previous example 
-# # as it creates dummy variables instead of convert it in numeric form.
-# 
-# # Create k-1 Categories
-# # 
-# # To avoid multi-collinearity, you can set one of the category as reference category 
-# # and leave it while creating dummy variables. In the script below, we are leaving first category.
-# 
-# 
-# X1_Customer_type_dummy = pd.get_dummies(hbat2["X1_Customer_type"], drop_first=True)
-# hbat2 = pd.concat([hbat2, X1_Customer_type_dummy], axis=1)
-#  
-# X2_Industry_Type_dummy = pd.get_dummies(hbat2["X2_Industry_Type"], drop_first=True)
-# hbat2 = pd.concat([hbat2, X2_Industry_Type_dummy], axis=1)
-#  
-# X3_Firm_Size_dummy = pd.get_dummies(hbat2["X3_Firm_Size"], drop_first=True)
-# hbat2 = pd.concat([hbat2, X3_Firm_Size_dummy], axis=1)
-#  
-# X4_Region_dummy = pd.get_dummies(hbat2["X4_Region"], drop_first=True)
-# hbat2 = pd.concat([hbat2, X4_Region_dummy], axis=1)
-#  
-# X5_Distribution_System_dummy = pd.get_dummies(hbat2["X5_Distribution_System"], drop_first=True)
-# hbat2 = pd.concat([hbat2, X5_Distribution_System_dummy], axis=1)
-#  
-# X23_Consider_Strategic_Alliance_dummy = pd.get_dummies(hbat2["X23_Consider_Strategic_Alliance"], drop_first=True)
-# hbat2 = pd.concat([hbat2, X23_Consider_Strategic_Alliance_dummy], axis=1)
-
-
-# # 3. Impute Missing Values
-# # Fill missing values of a particular variable
-# # fill missing values with 0
-# df['var1'] = df['var1'].fillna(0)
-# # fill missing values with mean
-# df['var1'] = df['var1'].fillna(df['var1'].mean())
-
-
-# # Apply imputation to the whole dataset
-# from sklearn.preprocessing import Imputer 
-# 
-# # Set an imputer object
-# mean_imputer = Imputer(missing_values='NaN', strategy='mean', axis=0)
-# 
-# # Train the imputor
-# mean_imputer = mean_imputer.fit(hbat2)
-# 
-# # Apply imputation
-# hbat2_new = mean_imputer.transform(hbat2.values)
-# 
-# # 4. Outlier Treatment
-# # 
-# # There are many ways to handle or treat outliers (or extreme values). Some of the methods are as follows -
-# # Cap extreme values at 95th / 99th percentile depending on distribution
-# # Apply log transformation of variables. See below the implementation of log transformation in Python.
-# 
-# import numpy as np
-# hbat2['X10_Advertising'] = np.log(hbat2['X10_Advertising'])
-# 
-# 
-# # 5. Standardization
-# # 
-# # In some algorithms, it is required to standardize variables before running the actual algorithm. 
-# # Standardization refers to the process of making mean of variable zero and unit variance (standard deviation).
-# 
-# #load dataset
-# dataset = load_boston()
-# predictors = dataset.data
-# target = dataset.target
-# df = pd.DataFrame(predictors, columns = dataset.feature_names)
-# 
-# #Apply Standardization
-# from sklearn.preprocessing import StandardScaler
-# k = StandardScaler()
-# df2 = k.fit_transform(df)
